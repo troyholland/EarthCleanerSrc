@@ -2,15 +2,11 @@
 //don't think this would be the applet class
 //applet class would be main one and would create an instance of this one
 
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JApplet; 
-import javax.swing.SwingUtilities;
 
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.BorderLayout;
@@ -18,12 +14,10 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-public class Game extends JApplet 
+public class Game extends JPanel
 {
-	private static final int frameWidth = 720;
-	private static final int frameHeight = 520;
-	
-	private String gameChoice; // new game or instructions
+	// start game or instructions
+	private String gameChoice;
 	
 	// where game will be played
 	private Board newBoard;
@@ -35,27 +29,16 @@ public class Game extends JApplet
 	/*
 	 * set up window and menu
 	 */
-	public void init()
+	// set up board and call init
+	public Game(int difficulty)
 	{
 		gameChoice = "";
 		
-		// create new game board
-		newBoard = new Board(this, 10);
+		// board to played on
+		newBoard = new Board(this, difficulty);
 		
-		// create and add main menu buttons to JFrame
-		try {
-			 SwingUtilities.invokeAndWait(new Runnable() {
-			 public void run() {
-				 setUpMenu();
-			 	}
-			 	
-			 });
-			 } catch (Exception e) {
-				 System.err.println("error");
-			 }
-		
-		setSize(frameWidth, frameHeight);
-		setVisible(true);
+		// set up menu for game
+		setUpMenu();
 	}
 	
 	/************************************************
@@ -68,6 +51,9 @@ public class Game extends JApplet
 	 */
 	public void setUpMenu()
 	{
+		// game's JPanel layout 
+		setLayout(new BorderLayout());
+		
 		// create and add main menu buttons to JFrame
 		buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout());
@@ -84,7 +70,7 @@ public class Game extends JApplet
 		buttonPanel.add(startGame);
 		buttonPanel.add(instructions);
 		
-		// add buttons and board to JFrame
+		// add buttons and board to JPanel
 		add(newBoard, BorderLayout.CENTER);
 		add(buttonPanel, BorderLayout.PAGE_END);
 	}

@@ -70,6 +70,7 @@ public class Board extends JPanel
 		
 		initListeners();
 		
+		// create background image
         ImageIcon myBackgroundImage = new ImageIcon("/Users/Troy/Desktop/workspace2/EnvironmentGame/environmentBack.jpg");
         backgroundImage = myBackgroundImage.getImage();
         scaledBackgroundImage = backgroundImage.getScaledInstance(gameWidth, gameHeight, Image.SCALE_FAST);
