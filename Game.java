@@ -26,6 +26,8 @@ public class Game extends JPanel
 	private JPanel buttonPanel;
 	private JPanel instructionPanel;
 	
+	private JPanel summaryPage;
+	
 	/*
 	 * set up window and menu
 	 */
@@ -141,6 +143,7 @@ public class Game extends JPanel
 		instructionPanel.setLayout(new BorderLayout());
 		
 		// labels that hold instruction info
+		// if, else for all of this, depending on if it is test or fun game
 		JLabel titleLabel = new JLabel("<html>Clean the earth!</html>");
 		titleLabel.setFont(new Font("Helvetica", Font.BOLD, 32));
 		titleLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -213,7 +216,7 @@ public class Game extends JPanel
 	{
 		remove(newBoard);
 		
-		JPanel summaryPage = new JPanel();
+		summaryPage = new JPanel();
 		summaryPage.setBackground(Color.WHITE);
 		summaryPage.setLayout(new BorderLayout());
 		
@@ -248,19 +251,24 @@ public class Game extends JPanel
 	{
 		public void actionPerformed(ActionEvent event)
 		{
-			// calls some function to generate next page
+			remakeGame();
 		}
 	}
 	
 	/*
 	 *  remake game so when you return it is present
-	 *  called when you want to play fun game
+	 *  called when you want to play fun game**
 	 */
 	public void remakeGame()
 	{
+		remove(summaryPage);
+		
 		// add original menu options
 		add(newBoard, BorderLayout.CENTER);
 		add(buttonPanel, BorderLayout.PAGE_END);
+		
+		validate();
+		repaint();
 	}
 	
 	/*
@@ -269,10 +277,7 @@ public class Game extends JPanel
 	public void resetGame()
 	{
 		// reset game information
-		newBoard.earthCleaner.resetCleaner(120, 120, 1, 0, 1);
-		
-		validate();
-		repaint();
+		newBoard.earthCleaner.resetCleaner(120, 120, 0, 0, 1);
 	}
 	
 	/*public static void main(String [] args) throws InterruptedException

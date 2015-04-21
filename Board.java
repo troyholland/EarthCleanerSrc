@@ -34,10 +34,10 @@ public class Board extends JPanel
 	private Game newGame;
 	
 	// user will press 'New Game' to start game
-	boolean gameStarted = false;
+	public boolean gameStarted = false;
 	
 	// if user has already played, then we know it's the 'fun' round
-	boolean testGamePlayed;
+	public boolean testGamePlayed = false;
 
 	/*
 	 *  adding earthCleaner and trash to game
@@ -55,18 +55,12 @@ public class Board extends JPanel
 		setBackground(Color.WHITE);
 		setPreferredSize(new Dimension(gameWidth, gameHeight));
 
-		if(testGamePlayed == false)
-		{
-			trashLeft = new JLabel("TRASH LEFT: " + earthCleaner.trashRequirement);
-			trashLeft.setForeground(Color.WHITE);
-			add(trashLeft);
-		}
-		else
-		{
-			trashCollected = new JLabel("TRASH COLLECTED: " + trashCollectedScore);
-			trashCollected.setForeground(Color.WHITE);
-			add(trashCollected);
-		}
+		trashLeft = new JLabel("TRASH LEFT: " + earthCleaner.trashRequirement);
+		trashLeft.setForeground(Color.WHITE);
+		add(trashLeft);
+
+		trashCollected = new JLabel("TRASH COLLECTED: " + trashCollectedScore);
+		trashCollected.setForeground(Color.WHITE);
 		
 		initListeners();
 		
@@ -88,7 +82,10 @@ public class Board extends JPanel
 			{}
 			@Override
 			public void keyReleased(KeyEvent event)
-			{}
+			{
+				//if(testGamePlayed == true)
+					//earthCleaner.keyReleased(event);
+			}
 			@Override
 			public void keyPressed(KeyEvent event)
 			{	
@@ -132,27 +129,42 @@ public class Board extends JPanel
 					trashLeft.setText("TRASH LEFT: " + earthCleaner.trashRequirement);
 				}
 				
-				Thread.sleep(90);
+				Thread.sleep(100);
 			}
 			else if(testGamePlayed == true)
 			{
 				earthCleaner.moveCleaner();
+				// also have trashGuy.moveTrashGuy() <-- adds trash every X number of moves
 				repaint();
 				
 				earthCleaner.edgeContinue();
 	
-				if(earthCleaner.trashCollected())
+				if(earthCleaner.trashCollected()) // counts how much you've collected
 				{
 					trashCollectedScore++;
-					earthCleaner.increaseCleanerSize();
 					trash.getRandomTrashLocation();
 					
 					trashCollected.setText("TRASH COLLECTED: " + trashCollectedScore);
 				}
 				
-				Thread.sleep(90);
+				// if(earthCleaner.trashGuyCollision())
+				// {
+				//		game over
+				// }
+				
+				// if(trashGuy.totalTrash() > 5)
+				// {
+				// 		exceeds some number, then game over
+				//		increments for each time the guy drops trash
+				// }
+				
+				Thread.sleep(80);
 			}
 		}
+		
+		// for fun level
+		remove(trashLeft);
+		add(trashCollected);
 	}
 	
 	/*

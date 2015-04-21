@@ -18,8 +18,8 @@ public class AppletMain extends JApplet {
 		try {
 			 SwingUtilities.invokeAndWait(new Runnable() {
 			 public void run() {
-				 	// would create game under some condition...like user presses 'next' button
-					newGame = new Game(10);
+				 	// would create game under some condition...like user presses 
+					newGame = new Game(1);
 					
 					// add Game to JApplet
 					add(newGame);
