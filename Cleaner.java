@@ -95,13 +95,25 @@ public class Cleaner
 
 		// if head hits any part of edge then cleaner moves to opposite edge
 		if(cleanerHeadX == newBoard.gameWidth)
+		{
 			cleanerXCoordinates.set(0, -40);
+			cleanerHeadX = -40;
+		}
 		else if(cleanerHeadX == -40)
+		{
 			cleanerXCoordinates.set(0, newBoard.gameWidth);
+			cleanerHeadX = newBoard.gameWidth;
+		}
 		else if(cleanerHeadY == newBoard.gameHeight)
+		{
 			cleanerYCoordinates.set(0, -40);
+			cleanerHeadY = -40;
+		}
 		else if(cleanerHeadY == -40)
+		{
 			cleanerYCoordinates.set(0, newBoard.gameHeight);
+			cleanerHeadY = newBoard.gameHeight;
+		}
 	}
 	
 	/*
@@ -133,6 +145,7 @@ public class Cleaner
 		}
 		
 		// based on key pressed, change head position (position 0)
+		// position of character in 'fun' mode
 		if(cleanerXDirection == 1)
 			cleanerXCoordinates.set(0, cleanerXCoordinates.get(0) + cleanerPartLength);
 		if(cleanerXDirection == -1)
@@ -151,7 +164,7 @@ public class Cleaner
 	 * gets key input (arrows)
 	 */
 	public void keyPressed(KeyEvent event)
-	{
+	{		
 		// right
 		if(event.getKeyCode() == KeyEvent.VK_RIGHT)
 		{
@@ -191,6 +204,13 @@ public class Cleaner
 		}
 	}
 	
+	// when released, doesn't move
+	/*public void keyReleased(KeyEvent event)
+	{
+		cleanerXDirection = 0;
+		cleanerYDirection = 0;
+	}*/
+	
 	/*
 	 *  increment by one
 	 */
@@ -221,8 +241,6 @@ public class Cleaner
 		cleanerXDirection = xDirection;
 		cleanerYDirection = yDirection;
 		cleanerSize = size;
-		
-		
 		
 		resetCleanerCoordiantes();
 	}

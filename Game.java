@@ -1,26 +1,23 @@
 //environment game Game class
+//don't think this would be the applet class
+//applet class would be main one and would create an instance of this one
 
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Color;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-public class Game extends JFrame 
+public class Game extends JPanel
 {
-	private static final int frameWidth = 250;
-	private static final int frameHeight = 250;
-	
-	private String gameChoice; // new game or instructions
+	// start game or instructions
+	private String gameChoice;
 	
 	// where game will be played
 	private Board newBoard;
@@ -29,39 +26,21 @@ public class Game extends JFrame
 	private JPanel buttonPanel;
 	private JPanel instructionPanel;
 	
+	private JPanel summaryPage;
+	
+	/*
+	 * set up window and menu
+	 */
 	// set up board and call init
 	public Game(int difficulty)
 	{
 		gameChoice = "";
 		
-		try{
-			// board to played on
-			newBoard = new Board(this, difficulty);
-
-			initGUI();
-		}
-		catch(InterruptedException e)
-		{
-			System.out.println("error");
-		}
-	}
-	
-	/*
-	 * set up window and menu
-	 */
-	public void initGUI() throws InterruptedException
-	{
-		// create and add main menu buttons to JFrame
-		setUpMenu();
+		// board to played on
+		newBoard = new Board(this, difficulty);
 		
-		// setup JFrame
-		setTitle("__Earth_Cleaner__");
-		setSize(frameWidth, frameHeight);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setResizable(false);
-		pack();
-		setLocationRelativeTo(null);
-		setVisible(true);
+		// set up menu for game
+		setUpMenu();
 	}
 	
 	/************************************************
@@ -74,6 +53,9 @@ public class Game extends JFrame
 	 */
 	public void setUpMenu()
 	{
+		// game's JPanel layout 
+		setLayout(new BorderLayout());
+		
 		// create and add main menu buttons to JFrame
 		buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout());
@@ -90,7 +72,7 @@ public class Game extends JFrame
 		buttonPanel.add(startGame);
 		buttonPanel.add(instructions);
 		
-		// add buttons and board to JFrame
+		// add buttons and board to JPanel
 		add(newBoard, BorderLayout.CENTER);
 		add(buttonPanel, BorderLayout.PAGE_END);
 	}
@@ -116,7 +98,7 @@ public class Game extends JFrame
 			if(gameChoice == "Clean the Earth!")
 			{
 				// fits board to screen
-				pack();
+				//pack();
 				
 				// required for .play() to start
 				newBoard.setGameStarted(true);
@@ -161,6 +143,7 @@ public class Game extends JFrame
 		instructionPanel.setLayout(new BorderLayout());
 		
 		// labels that hold instruction info
+		// if, else for all of this, depending on if it is test or fun game
 		JLabel titleLabel = new JLabel("<html>Clean the earth!</html>");
 		titleLabel.setFont(new Font("Helvetica", Font.BOLD, 32));
 		titleLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -233,7 +216,7 @@ public class Game extends JFrame
 	{
 		remove(newBoard);
 		
-		JPanel summaryPage = new JPanel();
+		summaryPage = new JPanel();
 		summaryPage.setBackground(Color.WHITE);
 		summaryPage.setLayout(new BorderLayout());
 		
@@ -268,19 +251,24 @@ public class Game extends JFrame
 	{
 		public void actionPerformed(ActionEvent event)
 		{
-			// calls some function to generate next page
+			remakeGame();
 		}
 	}
 	
 	/*
 	 *  remake game so when you return it is present
-	 *  called when you want to play fun game
+	 *  called when you want to play fun game**
 	 */
 	public void remakeGame()
 	{
+		remove(summaryPage);
+		
 		// add original menu options
 		add(newBoard, BorderLayout.CENTER);
 		add(buttonPanel, BorderLayout.PAGE_END);
+		
+		validate();
+		repaint();
 	}
 	
 	/*
@@ -289,13 +277,10 @@ public class Game extends JFrame
 	public void resetGame()
 	{
 		// reset game information
-		newBoard.earthCleaner.resetCleaner(120, 120, 1, 0, 1);
-		
-		validate();
-		repaint();
+		newBoard.earthCleaner.resetCleaner(120, 120, 0, 0, 1);
 	}
 	
-	public static void main(String [] args) throws InterruptedException
+	/*public static void main(String [] args) throws InterruptedException
 	{
 		// event dispatch thread
         EventQueue.invokeLater(new Runnable() {
@@ -304,5 +289,5 @@ public class Game extends JFrame
                 Game game = new Game(25);
             }
         });
-	}
+	}*/
 }
