@@ -11,15 +11,19 @@ public class AppletMain extends JApplet {
 	// where game will be played
 	private Game newGame;
 	
+	private AppletMain myApplet;
+	
 	// required method for JApplet
 	// executed upon creation
 	public void init()
 	{
+		myApplet = this;
+		
 		try {
 			 SwingUtilities.invokeAndWait(new Runnable() {
 			 public void run() {
 				 	// would create game under some condition...like user presses 
-					newGame = new Game(1);
+					newGame = new Game(6, myApplet);
 					
 					// add Game to JApplet
 					add(newGame);

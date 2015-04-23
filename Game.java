@@ -21,6 +21,7 @@ public class Game extends JPanel
 	
 	// where game will be played
 	private Board newBoard;
+	private AppletMain appletMain;
 	
 	// holds main menu information
 	private JPanel buttonPanel;
@@ -32,12 +33,13 @@ public class Game extends JPanel
 	 * set up window and menu
 	 */
 	// set up board and call init
-	public Game(int difficulty)
+	public Game(int difficulty, AppletMain myApplet)
 	{
 		gameChoice = "";
 		
 		// board to played on
-		newBoard = new Board(this, difficulty);
+		this.newBoard = new Board(this, difficulty);
+		this.appletMain = myApplet;
 		
 		// set up menu for game
 		setUpMenu();
@@ -121,7 +123,10 @@ public class Game extends JPanel
 			else if(gameChoice == "How Do You Clean It?")
 			{	
 				// set up
-				setUpInstructionsPage();
+				if(newBoard.testGamePlayed == false)
+					setUpInstructionsPageTest();
+				else
+					setUpInstructionsPageFun();
 				
 				validate();
 				repaint();
@@ -130,9 +135,9 @@ public class Game extends JPanel
 	}
 	
 	/*
-	 *  instructions page
+	 *  instructions page test
 	 */
-	public void setUpInstructionsPage()
+	public void setUpInstructionsPageTest()
 	{
 		// remove playing board
 		remove(newBoard);
@@ -177,6 +182,54 @@ public class Game extends JPanel
 	}
 	
 	/*
+	 *  instructions page fun
+	 */
+	public void setUpInstructionsPageFun()
+	{
+		// remove playing board
+		remove(newBoard);
+		
+		// entire instruction panel
+		instructionPanel = new JPanel();
+		instructionPanel.setBackground(Color.WHITE);
+		instructionPanel.setLayout(new BorderLayout());
+		
+		// labels that hold instruction info
+		// if, else for all of this, depending on if it is test or fun game
+		JLabel titleLabel = new JLabel("<html>Save the Earth!</html>");
+		titleLabel.setFont(new Font("Helvetica", Font.BOLD, 32));
+		titleLabel.setHorizontalAlignment(JLabel.CENTER);
+		
+		JLabel centerInstLabel = new JLabel("<html>INSTRUCTIONS:<br>1) You control earth's destiny!"
+				+ "<br>2) The trash man wants to pollute the earth!<br>3) Move with the arrow keys<br>"
+				+ "4) Every 10 moves, the trash man will drop a piece of trash<br>"
+				+ "5) You must collect these pieces of trash before they accumulate to 5 total!"
+				+ "<br>6) Don't run into the trash man!</html>");
+		centerInstLabel.setFont(new Font("Helvetica", Font.BOLD, 22));
+		
+		// set colors of fonts
+		titleLabel.setForeground(Color.BLACK);
+		centerInstLabel.setForeground(Color.BLACK);
+		
+		// back button to return to main menu
+		JPanel backButtonPanel = new JPanel();
+		backButtonPanel.setBackground(Color.WHITE);
+		JButton back = new JButton("Back");
+		back.setFont(new Font("Helvetica", Font.BOLD, 12));
+		back.setForeground(Color.BLACK);
+		back.addActionListener(new backButtonListener());
+		backButtonPanel.add(back);
+		
+		// add to panel
+		instructionPanel.add(titleLabel, BorderLayout.PAGE_START);
+		instructionPanel.add(centerInstLabel, BorderLayout.CENTER);
+		instructionPanel.add(backButtonPanel, BorderLayout.PAGE_END);
+
+		// add panel to frame
+		add(instructionPanel);
+	}
+	
+	/*
 	 *  back button
 	 */
 	class backButtonListener implements ActionListener
@@ -196,17 +249,36 @@ public class Game extends JPanel
 	}
 	
 	/*
-	 *  if game over, create pop up window
+	 *  if test game over, create pop up window
 	 */
-	public void gameOver()
+	public void gameOverTest()
 	{
 		String gameOverMessage = "YAY! YOU'VE HELPED TO CLEAN THE EARTH!";
-		JOptionPane.showMessageDialog(this, gameOverMessage, "REQUIRMENT COMPLETE", JOptionPane.YES_NO_OPTION);
+		JOptionPane.showMessageDialog(this, gameOverMessage, "REQUIREMENT COMPLETE", JOptionPane.YES_NO_OPTION);
 		
-		// game has now ended
+		// game has now ended, so, set to false
 		newBoard.setGameStarted(false);
 		
-		nextScreen(); // get info to advance screens
+		//nextScreen(); // get info to advance screens
+		
+		// open up next page
+		//appletMain.gameToSum()
+	}
+	
+	/*
+	 *  if fun game over, create pop up window
+	 */
+	public void gameOverFun()
+	{
+		String gameOverMessage = "NO! HE GOT THE BETTER OF YOU!";
+		JOptionPane.showMessageDialog(this, gameOverMessage, "ARGH!", JOptionPane.YES_NO_OPTION);
+		
+		// game has now ended, so, set to false
+		newBoard.setGameStarted(false);
+		
+		//nextScreen(); // get info to advance screens
+		
+		remakeGame();
 	}
 	
 	/*
@@ -214,7 +286,7 @@ public class Game extends JPanel
 	 */
 	public void nextScreen()
 	{
-		remove(newBoard);
+		remove(newBoard); // remove the game board
 		
 		summaryPage = new JPanel();
 		summaryPage.setBackground(Color.WHITE);
@@ -241,7 +313,7 @@ public class Game extends JPanel
 		validate();
 		repaint();
 		
-		resetGame(); // resets information
+		//resetGame(); // resets information
 	}
 	
 	/*
@@ -251,20 +323,21 @@ public class Game extends JPanel
 	{
 		public void actionPerformed(ActionEvent event)
 		{
+			remove(summaryPage);
+			add(newBoard, BorderLayout.CENTER);
 			remakeGame();
 		}
 	}
 	
 	/*
-	 *  remake game so when you return it is present
+	 *  re-make game so when you return it is present
 	 *  called when you want to play fun game**
 	 */
 	public void remakeGame()
 	{
-		remove(summaryPage);
+		resetGame();
 		
-		// add original menu options
-		add(newBoard, BorderLayout.CENTER);
+		// add original buttons
 		add(buttonPanel, BorderLayout.PAGE_END);
 		
 		validate();
@@ -277,7 +350,8 @@ public class Game extends JPanel
 	public void resetGame()
 	{
 		// reset game information
-		newBoard.earthCleaner.resetCleaner(120, 120, 0, 0, 1);
+		newBoard.earthCleaner.resetCleaner(120, 120, 1, 0, 1);
+		newBoard.trashMan.resetTrashProduced();
 	}
 	
 	/*public static void main(String [] args) throws InterruptedException

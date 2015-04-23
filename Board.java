@@ -18,47 +18,48 @@ public class Board extends JPanel
 	public final int gameWidth = 720;
 	public final int gameHeight = 520;
 	
-	// elements of game
-	Cleaner earthCleaner;
-	Trash trash;
+	// elements of the game
+	private Game newGame;
+	public Cleaner earthCleaner;
+	public Trash trash;
+	public TrashMan trashMan;
 	
+	// images for game background
 	private Image backgroundImage;
 	private Image scaledBackgroundImage;
 	
-	// holds information for trash left and collected (test and fun)
-	private JLabel trashLeft;
-	private JLabel trashCollected;
-	
-	private int trashCollectedScore;
-	
-	private Game newGame;
+	// holds information for trash on screen
+	private JLabel trashLeft; // test
+	private JLabel trashCollected; // fun
 	
 	// user will press 'New Game' to start game
 	public boolean gameStarted = false;
 	
-	// if user has already played, then we know it's the 'fun' round
+	// for checking to see if test or fun game
 	public boolean testGamePlayed = false;
-
-	/*
-	 *  adding earthCleaner and trash to game
-	 */
+	
+	// fun game score
+	private int trashCollectedScore;
+	
 	public Board(Game game, int difficulty)
 	{
 		trashCollectedScore = 0;
 		
-		// set up components of game and tie board to game
+		// set up components of game and tie to the board
 		this.newGame = game;
-		earthCleaner = new Cleaner(this, difficulty);
-		trash = new Trash(this);
+		this.earthCleaner = new Cleaner(this, difficulty);
+		this.trashMan = new TrashMan(this);
+		this.trash = new Trash(this);
 		
 		// set up board and add panel that counts score on top
-		setBackground(Color.WHITE);
 		setPreferredSize(new Dimension(gameWidth, gameHeight));
 
+		// in 'test' game display this
 		trashLeft = new JLabel("TRASH LEFT: " + earthCleaner.trashRequirement);
 		trashLeft.setForeground(Color.WHITE);
 		add(trashLeft);
 
+		// in 'fun' game display this
 		trashCollected = new JLabel("TRASH COLLECTED: " + trashCollectedScore);
 		trashCollected.setForeground(Color.WHITE);
 		
@@ -82,16 +83,14 @@ public class Board extends JPanel
 			{}
 			@Override
 			public void keyReleased(KeyEvent event)
-			{
-				//if(testGamePlayed == true)
-					//earthCleaner.keyReleased(event);
-			}
+			{}
 			@Override
 			public void keyPressed(KeyEvent event)
 			{	
 				earthCleaner.keyPressed(event);
 			}
 		};
+		
 		setFocusable(true);
 		addKeyListener(listener);
 	}
@@ -100,15 +99,17 @@ public class Board extends JPanel
 	 * Main Method:
 	 * -play the game
 	 * -while loop that begins only if user has
-	 * started a new game
+	 * started a new game (pressed 'start game')
 	 ************************************************/
 	public void play() throws InterruptedException
 	{	
-		trash.getRandomTrashLocation(); // place first piece of trash
+		if(testGamePlayed == false)
+			trash.getRandomTrashLocation();
 		
-		// user has pressed "StartGame" on menu
+		// user has pressed "Start Game" on menu
 		while(gameStarted)
 		{
+			// the 'test' game
 			if(testGamePlayed == false)
 			{
 				earthCleaner.moveCleaner();
@@ -118,9 +119,11 @@ public class Board extends JPanel
 	
 				if(earthCleaner.trashCollected())
 				{
+					// show garbage and decrement requirement
 					earthCleaner.increaseCleanerSize();
 					earthCleaner.decrementTrashRequirement();
 					
+					// done when all trash is picked up
 					if(earthCleaner.trashRequirement == 0)
 						gameOver();
 					
@@ -131,34 +134,37 @@ public class Board extends JPanel
 				
 				Thread.sleep(100);
 			}
+			// the 'fun' game
 			else if(testGamePlayed == true)
 			{
-				earthCleaner.moveCleaner();
-				// also have trashGuy.moveTrashGuy() <-- adds trash every X number of moves
-				repaint();
+				// show score
+				trashCollected.setText("TRASH COLLECTED: " + trashCollectedScore);
 				
+				// move cleaner and trashMan
+				earthCleaner.moveCleaner();
+				trashMan.moveRandomTrashMan(); // adds trash every 15 moves
+				
+				repaint(); // repaint after move
+				
+				// allows for move from edge to edge
 				earthCleaner.edgeContinue();
 	
-				if(earthCleaner.trashCollected()) // counts how much you've collected
+				// if trash collected
+				if(earthCleaner.trashMadeCollected())
 				{
 					trashCollectedScore++;
-					trash.getRandomTrashLocation();
-					
 					trashCollected.setText("TRASH COLLECTED: " + trashCollectedScore);
 				}
 				
-				// if(earthCleaner.trashGuyCollision())
-				// {
-				//		game over
-				// }
+				// run into trashMan
+				if(earthCleaner.trashManCollision())
+					gameOver();
 				
-				// if(trashGuy.totalTrash() > 5)
-				// {
-				// 		exceeds some number, then game over
-				//		increments for each time the guy drops trash
-				// }
+				// if trash is > 4
+				if(trashMan.producedTrash > 4)
+					gameOver();
 				
-				Thread.sleep(80);
+				Thread.sleep(100);
 			}
 		}
 		
@@ -168,7 +174,7 @@ public class Board extends JPanel
 	}
 	
 	/*
-	 *  to manipulate private variable
+	 *  to manipulate setGameStarted variable
 	 */
 	public void setGameStarted(boolean hasGameStarted)
 	{
@@ -180,9 +186,15 @@ public class Board extends JPanel
 	 */
 	public void gameOver()
 	{
-		testGamePlayed = true; // game has been played for the first time
+		trashCollectedScore = 0;
 		
-		newGame.gameOver();
+		if(testGamePlayed)
+			newGame.gameOverFun();
+		else
+			newGame.gameOverTest();
+		
+		// game has been played at least once
+		testGamePlayed = true;
 	}
 	
 	/*
@@ -196,10 +208,17 @@ public class Board extends JPanel
 		my2DGraphic.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
 				RenderingHints.VALUE_ANTIALIAS_ON);
 		earthCleaner.paint(my2DGraphic);
-		trash.paint(my2DGraphic);
+		
+		if(testGamePlayed == false)
+			trash.paint(my2DGraphic);
+		
+		// only add trashMan once 'fun' game started
+		if(testGamePlayed)
+			trashMan.paint(my2DGraphic);
 	}
-	
-	//http://stackoverflow.com/questions/19125707/simplest-way-to-set-image-as-jpanel-background
+	/*
+	 * for background
+	 */
 	@Override
 	protected void paintComponent(Graphics background) 
 	{

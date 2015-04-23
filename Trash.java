@@ -1,4 +1,5 @@
 //environment game trash class
+//only for single trash
 
 import java.awt.Graphics;
 import java.util.Random;
@@ -10,7 +11,6 @@ import javax.swing.ImageIcon;
 public class Trash 
 {
 	// location of food
-	// public for unit tests
 	public int trashX;
 	public int trashY;
 	
@@ -20,12 +20,13 @@ public class Trash
 	private Image trashImage;
 	private Image scaledTrashImage;
 	
-	// board for trash
+	// board for game
 	private Board newBoard;
 	
 	public Trash(Board board)
 	{
-		trashX = 40; // initialize to (40, 40)
+		// initial location at (40, 40)
+		trashX = 40;
 		trashY = 40;
 		
 		this.newBoard = board;
@@ -33,8 +34,6 @@ public class Trash
 		// load image
         ImageIcon myImage = new ImageIcon("/Users/Troy/Desktop/workspace2/EnvironmentGame/trashImage.png");
         trashImage = myImage.getImage();
-        
-        // scales image to desired size
         scaledTrashImage = trashImage.getScaledInstance(trashSize, trashSize, Image.SCALE_FAST);
 	}
 	
@@ -49,7 +48,7 @@ public class Trash
 		trashX = (randomNum.nextInt((newBoard.gameWidth / trashSize) - 1) + 1)*trashSize;
 		trashY = (randomNum.nextInt((newBoard.gameHeight / trashSize) - 1) + 1)*trashSize;
 		
-		for(int size = 0; size < newBoard.earthCleaner.cleanerSize; size++)
+		for(int size = 0; size < newBoard.earthCleaner.cleanerLength; size++)
 		{
 			// if trash is first placed on spot where earthCleaner already is
 			if(trashX == newBoard.earthCleaner.cleanerXCoordinates.get(size) &&
@@ -59,7 +58,7 @@ public class Trash
 	}
 	
 	/*
-	 *  check for collisions
+	 *  for location of singular trash
 	 */
 	public Rectangle getTrashBounds()
 	{
