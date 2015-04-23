@@ -10,7 +10,7 @@ import javax.swing.ImageIcon;
 
 public class Trash 
 {
-	// location of food
+	// location of trash
 	public int trashX;
 	public int trashY;
 	
