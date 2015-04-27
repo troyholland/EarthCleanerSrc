@@ -25,8 +25,10 @@ public class Board extends JPanel
 	public TrashMan trashMan;
 	
 	// images for game background
-	private Image backgroundImage;
-	private Image scaledBackgroundImage;
+	private Image backgroundImageEarth;
+	private Image scaledBackgroundImageEarth;
+	private Image backgroundImageOcean;
+	private Image scaledBackgroundImageOcean;
 	
 	// holds information for trash on screen
 	private JLabel trashLeft; // test
@@ -66,9 +68,14 @@ public class Board extends JPanel
 		initListeners();
 		
 		// create background image
-        ImageIcon myBackgroundImage = new ImageIcon("/Users/Troy/Desktop/workspace2/EnvironmentGame/environmentBack.jpg");
-        backgroundImage = myBackgroundImage.getImage();
-        scaledBackgroundImage = backgroundImage.getScaledInstance(gameWidth, gameHeight, Image.SCALE_FAST);
+        ImageIcon myBackgroundImageEarth = new ImageIcon(this.getClass().getResource("/environmentBack.jpg"));
+        backgroundImageEarth = myBackgroundImageEarth.getImage();
+        scaledBackgroundImageEarth = backgroundImageEarth.getScaledInstance(gameWidth, gameHeight, Image.SCALE_FAST);
+        
+		// create background image
+        ImageIcon myBackgroundImageOcean = new ImageIcon(this.getClass().getResource("/oceanBackground.jpg"));
+        backgroundImageOcean = myBackgroundImageOcean.getImage();
+        scaledBackgroundImageOcean = backgroundImageOcean.getScaledInstance(gameWidth, gameHeight, Image.SCALE_FAST);
 	}
 	
 	/*
@@ -109,32 +116,39 @@ public class Board extends JPanel
 		// user has pressed "Start Game" on menu
 		while(gameStarted)
 		{
-			// the 'test' game
+			// the 'earth' game
 			if(testGamePlayed == false)
 			{
 				earthCleaner.moveCleaner();
+				earthCleaner.edgeContinue();
+				
 				repaint();
 				
-				earthCleaner.edgeContinue();
-	
-				if(earthCleaner.trashCollected())
+				if(earthCleaner.trashCollected() && earthCleaner.getCleanerLength() == 1)
 				{
-					// show garbage and decrement requirement
 					earthCleaner.increaseCleanerSize();
+					trash.removeTrash();
+				}
+				
+				if(earthCleaner.trashRecycled())
+				{
 					earthCleaner.decrementTrashRequirement();
+					earthCleaner.decreaseCleanerSize();
+					trash.getRandomTrashLocation();
+					trash.plantTree();
 					
 					// done when all trash is picked up
 					if(earthCleaner.trashRequirement == 0)
 						gameOver();
 					
-					trash.getRandomTrashLocation();
-					
 					trashLeft.setText("TRASH LEFT: " + earthCleaner.trashRequirement);
 				}
 				
+				//repaint();
+				
 				Thread.sleep(100);
 			}
-			// the 'fun' game
+			// the 'ocean' game
 			else if(testGamePlayed == true)
 			{
 				// show score
@@ -144,15 +158,19 @@ public class Board extends JPanel
 				earthCleaner.moveCleaner();
 				trashMan.moveRandomTrashMan(); // adds trash every 15 moves
 				
-				repaint(); // repaint after move
+				repaint();
 				
 				// allows for move from edge to edge
 				earthCleaner.edgeContinue();
 	
 				// if trash collected
 				if(earthCleaner.trashMadeCollected())
+					earthCleaner.increaseCleanerSize();
+				
+				if(earthCleaner.trashMadePickedUp())
 				{
 					trashCollectedScore++;
+					earthCleaner.decreaseCleanerSize();
 					trashCollected.setText("TRASH COLLECTED: " + trashCollectedScore);
 				}
 				
@@ -161,8 +179,10 @@ public class Board extends JPanel
 					gameOver();
 				
 				// if trash is > 4
-				if(trashMan.producedTrash > 4)
+				if(trashMan.producedTrash > 9)
 					gameOver();
+				
+				//repaint(); // repaint after move
 				
 				Thread.sleep(100);
 			}
@@ -185,13 +205,13 @@ public class Board extends JPanel
 	 *  resets score and distance to allow for new game
 	 */
 	public void gameOver()
-	{
-		trashCollectedScore = 0;
-		
+	{	
 		if(testGamePlayed)
-			newGame.gameOverFun();
+			newGame.gameOverOcean(trashCollectedScore);
 		else
-			newGame.gameOverTest();
+			newGame.gameOverEarth();
+		
+		trashCollectedScore = 0;
 		
 		// game has been played at least once
 		testGamePlayed = true;
@@ -223,7 +243,10 @@ public class Board extends JPanel
 	protected void paintComponent(Graphics background) 
 	{
 	    super.paintComponent(background);
-	        background.drawImage(scaledBackgroundImage, 0, 0, null);
+	    if(testGamePlayed == false)
+	        background.drawImage(scaledBackgroundImageEarth, 0, 0, null);
+	    else
+	    	background.drawImage(scaledBackgroundImageOcean, 0, 0, null);
 	}
 	
 }

@@ -16,12 +16,18 @@ public class TrashMan
 	public List<Integer>trashMadeXCoordinates = new ArrayList<Integer>();
 	public List<Integer>trashMadeYCoordinates = new ArrayList<Integer>();
 	
+	// holds coordinates of garbageBins
+	public List<Integer>garbageBinsXCoordinates = new ArrayList<Integer>();
+	public List<Integer>garbageBinsYCoordinates = new ArrayList<Integer>();
+	
 	// location of trashMan
 	public int trashManX;
 	public int trashManY;
 	
 	private static final int trashManSize = 40;
 	private static final int trashSize = 40;
+	private static final int garbageBinSize = 40;
+	private static final int movesTillDrop = 15;
 	
 	// board for game
 	private Board newBoard;
@@ -31,6 +37,8 @@ public class TrashMan
 	private Image scaledTrashImage;
 	private Image trashManImage;
 	private Image scaledTrashManImage;
+	private Image garbageBinImage;
+	private Image scaledGarbageBinImage;
 	
 	// for producing trash
 	public int movesForTrash;
@@ -44,18 +52,33 @@ public class TrashMan
 		trashManX = 280;
 		trashManY = 280;
 		
+		// set up garbageBin bins coordinates
+		garbageBinsXCoordinates.add(newBoard.gameWidth - 3*garbageBinSize);
+		garbageBinsYCoordinates.add(2*garbageBinSize);
+		garbageBinsXCoordinates.add(2*garbageBinSize);
+		garbageBinsYCoordinates.add(2*garbageBinSize);
+		garbageBinsXCoordinates.add(newBoard.gameWidth - 3*garbageBinSize);
+		garbageBinsYCoordinates.add(newBoard.gameHeight - 3*garbageBinSize);
+		garbageBinsXCoordinates.add(2*garbageBinSize);
+		garbageBinsYCoordinates.add(newBoard.gameHeight - 3*garbageBinSize);
+		
 		producedTrash = 0;
 		movesForTrash = 0;
 		
         // TRASHMAN IMAGE
-        ImageIcon myTrashManImage = new ImageIcon("/Users/Troy/Desktop/workspace2/EnvironmentGame/trashGuy.png");
+        ImageIcon myTrashManImage = new ImageIcon(this.getClass().getResource("/trashGuy.png"));
         trashManImage = myTrashManImage.getImage();
-        scaledTrashManImage = trashManImage.getScaledInstance(trashManSize, trashManSize, Image.SCALE_FAST);
+        scaledTrashManImage = trashManImage.getScaledInstance(trashManSize, trashManSize, Image.SCALE_SMOOTH);
         
         // TRASH IMAGE
-        ImageIcon myTrashImage = new ImageIcon("/Users/Troy/Desktop/workspace2/EnvironmentGame/trashImage.png");
+        ImageIcon myTrashImage = new ImageIcon(this.getClass().getResource("/trashImage.png"));
         trashImage = myTrashImage.getImage();
-        scaledTrashImage = trashImage.getScaledInstance(trashSize, trashSize, Image.SCALE_FAST);
+        scaledTrashImage = trashImage.getScaledInstance(trashSize, trashSize, Image.SCALE_SMOOTH);
+        
+        // GARBAGE BIN IMAGE
+        ImageIcon myGarbageBinImage = new ImageIcon(this.getClass().getResource("/garbageBinImage.png"));
+        garbageBinImage = myGarbageBinImage.getImage();
+        scaledGarbageBinImage = garbageBinImage.getScaledInstance(garbageBinSize, garbageBinSize, Image.SCALE_SMOOTH);
 	}
 	
 	/*
@@ -65,7 +88,7 @@ public class TrashMan
 	{		
 		// get random value
 		Random randomNum = new Random();
-		int randomNumber = randomNum.nextInt(4) + 1;
+		int randomNumber = randomNum.nextInt(5) + 1;
 		
 		// if trashMan is on/near the edge
 		if(trashManX == (newBoard.gameWidth - trashManSize) || trashManX == (newBoard.gameWidth - 2*trashManSize))
@@ -108,7 +131,7 @@ public class TrashMan
 		boolean newTrashUnique = true;
 		
 		// if hit 15
-		if(movesMade == 15)
+		if(movesMade == movesTillDrop)
 		{
 			// go through all previous trash produced
 			for(int size = 0; size < producedTrash; size++)
@@ -119,8 +142,8 @@ public class TrashMan
 					newTrashUnique = false;
 			}
 			
-			// if unique
-			if(newTrashUnique)
+			// if unique trash location and does not overlap with garbage bin
+			if(newTrashUnique && checkGarbageBinLocation(trashManX, trashManY) == false)
 			{
 				// at 10th move add trash where trashMan is located
 				trashMadeXCoordinates.add(trashManX);
@@ -160,6 +183,23 @@ public class TrashMan
 	}
 	
 	/*
+	 *  check to see if conflict with location
+	 */
+	public boolean checkGarbageBinLocation(int xCoord, int yCoord)
+	{
+		boolean sameAsGarbageBin = false;
+		
+		// number of bins
+        for(int size = 0; size < 4; size++)
+        {
+        	if(xCoord == garbageBinsXCoordinates.get(size) && yCoord == garbageBinsYCoordinates.get(size))
+        		sameAsGarbageBin = true;
+        }
+		
+		return sameAsGarbageBin;
+	}
+	
+	/*
 	 * get bounds for trash dropped
 	 */
 	public Rectangle getTrashMadeBounds(int size)
@@ -181,17 +221,29 @@ public class TrashMan
 	public void resetTrashProduced()
 	{
 		producedTrash = 0;
+		movesForTrash = 0;
+		trashManX = 280;
+		trashManY = 280;
 		trashMadeXCoordinates.clear();
 		trashMadeYCoordinates.clear();
 	}
 		
+	// paint the graphics
 	public void paint(Graphics trashGraphics)
 	{	
+		// trash
 		for(int size = 0; size < producedTrash; size++)
 			trashGraphics.drawImage(scaledTrashImage, trashMadeXCoordinates.get(size), trashMadeYCoordinates.get(size),
 					newBoard);
 		
+		// trash man
         trashGraphics.drawImage(scaledTrashManImage, trashManX, trashManY, newBoard);
+        
+        // garbage bins
+        for(int size = 0; size < 4; size++)
+        	trashGraphics.drawImage(scaledGarbageBinImage, garbageBinsXCoordinates.get(size), garbageBinsYCoordinates.get(size),
+					newBoard);
+        
 	}
 	
 }

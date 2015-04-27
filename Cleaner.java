@@ -28,7 +28,6 @@ public class Cleaner
 	//the length of each part of the cleaner
 	private static final int cleanerSize = 40;
 	private static final int trashSize = 40;
-	private static final int treeSize = 40;
 	
 	// board for game
 	private Board newBoard;
@@ -36,13 +35,24 @@ public class Cleaner
 	// get all of the images
 	private Image earthCleanerImage;
 	private Image earthCleanerImageScaled;
+	private Image oceanCleanerImage;
+	private Image oceanCleanerImageScaled;
+	
 	private Image trashImage;
 	private Image scaledTrashImage;
-	private Image treeImage;
-	private Image scaledTreeImage;
+	
+	private Image plasticTrashImage;
+	private Image scaledPlasticTrashImage;
+	private Image glassTrashImage;
+	private Image scaledGlassTrashImage;
+	private Image aluminumTrashImage;
+	private Image scaledAluminumTrashImage;
+	private Image paperTrashImage;
+	private Image scaledPaperTrashImage;
 	
 	// amount of trash cleaner must pick up
 	public int trashRequirement;
+	public int trashCollectedType;
 	
 	// constructor
 	public Cleaner(Board board, int difficulty)
@@ -62,19 +72,39 @@ public class Cleaner
 		cleanerYCoordinates.add(120);
 		
 		// EARTH CLEANER IMAGE
-        ImageIcon myEarthCleanerImage = new ImageIcon("/Users/Troy/Desktop/workspace2/EnvironmentGame/garbageManImage.gif");
+        ImageIcon myEarthCleanerImage = new ImageIcon(this.getClass().getResource("/garbageManImage.gif"));
         earthCleanerImage = myEarthCleanerImage.getImage();
-        earthCleanerImageScaled = earthCleanerImage.getScaledInstance(cleanerSize, cleanerSize, Image.SCALE_FAST);
+        earthCleanerImageScaled = earthCleanerImage.getScaledInstance(cleanerSize, cleanerSize, Image.SCALE_SMOOTH);
+        
+        // OCEAN CLEANER IMAGE
+        ImageIcon myOceanCleanerImage = new ImageIcon(this.getClass().getResource("/waterCleanerImage.png"));
+        oceanCleanerImage = myOceanCleanerImage.getImage();
+        oceanCleanerImageScaled = oceanCleanerImage.getScaledInstance(cleanerSize, cleanerSize, Image.SCALE_SMOOTH);
+        
+        // TRASH PLASTIC
+        ImageIcon myTrashImagePlastic = new ImageIcon(this.getClass().getResource("/plasticTrash.png"));
+        plasticTrashImage = myTrashImagePlastic.getImage();
+        scaledPlasticTrashImage = plasticTrashImage.getScaledInstance(trashSize, trashSize, Image.SCALE_SMOOTH);
+        
+        // TRASH GLASS
+        ImageIcon myTrashImageGlass = new ImageIcon(this.getClass().getResource("/glassTrash.png"));
+        glassTrashImage = myTrashImageGlass.getImage();
+        scaledGlassTrashImage = glassTrashImage.getScaledInstance(trashSize, trashSize, Image.SCALE_SMOOTH);
+        
+        // TRASH ALUMINUM
+        ImageIcon myTrashImageAluminum = new ImageIcon(this.getClass().getResource("/canTrash.png"));
+        aluminumTrashImage = myTrashImageAluminum.getImage();
+        scaledAluminumTrashImage = aluminumTrashImage.getScaledInstance(trashSize, trashSize, Image.SCALE_SMOOTH);
+        
+        // TRASH PAPER
+        ImageIcon myTrashImagePaper = new ImageIcon(this.getClass().getResource("/paperTrash.png"));
+        paperTrashImage = myTrashImagePaper.getImage();
+        scaledPaperTrashImage = paperTrashImage.getScaledInstance(trashSize, trashSize, Image.SCALE_SMOOTH);
         
         // TRASH IMAGE
-        ImageIcon myTrashImage = new ImageIcon("/Users/Troy/Desktop/workspace2/EnvironmentGame/trashImage.png");
+        ImageIcon myTrashImage = new ImageIcon(this.getClass().getResource("/trashImage.png"));
         trashImage = myTrashImage.getImage();
-        scaledTrashImage = trashImage.getScaledInstance(trashSize, trashSize, Image.SCALE_FAST);
-        
-        // TREE IMAGE
-        ImageIcon myTreeImage = new ImageIcon("/Users/Troy/Desktop/workspace2/EnvironmentGame/treeImage.png");
-        treeImage = myTreeImage.getImage();
-        scaledTreeImage = treeImage.getScaledInstance(treeSize, treeSize, Image.SCALE_FAST);
+        scaledTrashImage = trashImage.getScaledInstance(trashSize, trashSize, Image.SCALE_SMOOTH);
 	}
 	
 	/************************************************
@@ -124,6 +154,11 @@ public class Cleaner
 				cleanerXDirection = 0;
 			}
 		}
+		
+		// if any error occurs and want to stop game
+		if(event.getKeyCode() == KeyEvent.VK_Q)
+			newBoard.gameOver();
+		
 	}
 	/*
 	 *  process of moving the cleaner
@@ -194,7 +229,27 @@ public class Cleaner
 	 */
 	public boolean trashCollected()
 	{
+		trashCollectedType = newBoard.trash.getTrashType(); // gets the trash type
+		
 		return newBoard.trash.getTrashBounds().intersects(getCleanerBounds());
+	}
+	
+	/*
+	 * trash recycled
+	 */
+	public boolean trashRecycled()
+	{
+		if(cleanerLength == 2)
+		{
+			for(int recycleBinType = 0; recycleBinType < 4; recycleBinType++)
+			{
+				if(newBoard.trash.getRecycleBounds(recycleBinType).intersects(getCleanerBounds()) && 
+						recycleBinType == trashCollectedType)
+					return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	/*
@@ -210,23 +265,39 @@ public class Cleaner
 	 */
 	public boolean trashMadeCollected()
 	{
-		int trashElementCollected = 0;
-		boolean trashMadeCollision = false;
+		boolean trashMadeCollected = false;
 		
-		for(trashElementCollected = 0; trashElementCollected < newBoard.trashMan.producedTrash; trashElementCollected++)
+		if(cleanerLength == 1)
 		{
-			// if cleaner hits any trash
-			if(newBoard.trashMan.getTrashMadeBounds(trashElementCollected).intersects(getCleanerBounds()))
+			for(int trashElementCollected = 0; trashElementCollected < newBoard.trashMan.producedTrash; trashElementCollected++)
 			{
-				trashMadeCollision = true;
-				
-				// shift list if updated
-				newBoard.trashMan.updateTrashList(trashElementCollected);
-				break;
+				// if cleaner hits any trash
+				if(newBoard.trashMan.getTrashMadeBounds(trashElementCollected).intersects(getCleanerBounds()))
+				{
+					trashMadeCollected = true;
+					
+					// shift list if updated
+					newBoard.trashMan.updateTrashList(trashElementCollected);
+					break;
+				}
 			}
 		}
 		
-		return trashMadeCollision;
+		return trashMadeCollected;
+	}
+	
+	public boolean trashMadePickedUp()
+	{
+		if(cleanerLength == 2)
+		{
+			for(int trashBin = 0; trashBin < 4; trashBin++)
+			{
+				if(newBoard.trash.getRecycleBounds(trashBin).intersects(getCleanerBounds()))
+					return true;
+			}
+		}
+		
+		return false;
 	}
 
 	/*
@@ -250,6 +321,23 @@ public class Cleaner
 	}
 	
 	/*
+	 * decrement by one
+	 */
+	public void decreaseCleanerSize()
+	{
+		// add to end of current cleaner what previous last part of cleaner was
+		cleanerXCoordinates.remove(1);
+		cleanerYCoordinates.remove(1);
+		
+		cleanerLength--;
+	}
+	
+	public int getCleanerLength()
+	{
+		return cleanerLength;
+	}
+	
+	/*
 	 *  decrement by one
 	 */
 	public void decrementTrashRequirement()
@@ -267,6 +355,7 @@ public class Cleaner
 		cleanerXDirection = xDirection;
 		cleanerYDirection = yDirection;
 		cleanerLength = size;
+		trashCollectedType = -1;
 		
 		resetCleanerCoordiantes();
 	}
@@ -279,30 +368,40 @@ public class Cleaner
 		cleanerYCoordinates.add(120);
 	}
 	
-	/*
-	 * paints cleaner, garbage, and trees, if necessary
-	 */
 	public void paint(Graphics graphicToDraw)
 	{	
-		int garbageCollected = cleanerLength - 1;
-        int treesToDraw =  garbageCollected / 5;
-        int garbageToDraw = garbageCollected - (treesToDraw * 5);
-        
-		graphicToDraw.drawImage(earthCleanerImageScaled, cleanerHeadX, cleanerHeadY, newBoard);
-        
-		if(treesToDraw > 0)
+		// draw cleaner
+		if(newBoard.testGamePlayed == false)
+			graphicToDraw.drawImage(earthCleanerImageScaled, cleanerHeadX, cleanerHeadY, newBoard);
+		else
+			graphicToDraw.drawImage(oceanCleanerImageScaled, cleanerHeadX, cleanerHeadY, newBoard);
+		
+		// draw cargo
+		if(cleanerLength == 2)
 		{
-			for(int size = 1; size < treesToDraw + 1; size++)
-			{
-				graphicToDraw.drawImage(scaledTreeImage, cleanerXCoordinates.get(size), cleanerYCoordinates.get(size), 
-						newBoard);
+			switch(trashCollectedType){
+				case 0:
+					graphicToDraw.drawImage(scaledPlasticTrashImage, cleanerXCoordinates.get(cleanerLength - 1), 
+							cleanerYCoordinates.get(cleanerLength - 1), newBoard);
+					break;
+				case 1:
+					graphicToDraw.drawImage(scaledGlassTrashImage, cleanerXCoordinates.get(cleanerLength - 1), 
+							cleanerYCoordinates.get(cleanerLength - 1), newBoard);
+					break;
+				case 2:
+					graphicToDraw.drawImage(scaledAluminumTrashImage, cleanerXCoordinates.get(cleanerLength - 1), 
+							cleanerYCoordinates.get(cleanerLength - 1), newBoard);
+					break;
+				case 3:
+					graphicToDraw.drawImage(scaledPaperTrashImage, cleanerXCoordinates.get(cleanerLength - 1), 
+							cleanerYCoordinates.get(cleanerLength - 1), newBoard);
+					break;
+				default: // for 'fun' game
+					graphicToDraw.drawImage(scaledTrashImage, cleanerXCoordinates.get(cleanerLength - 1), 
+							cleanerYCoordinates.get(cleanerLength - 1), newBoard);
+					
 			}
 		}
-		
-		for(int size = treesToDraw + 1; size < treesToDraw + 1 + garbageToDraw; size++)
-		{
-			graphicToDraw.drawImage(scaledTrashImage, cleanerXCoordinates.get(size), cleanerYCoordinates.get(size), 
-					newBoard);
-		}
+        
 	}
 }
