@@ -19,6 +19,8 @@ public class Cleaner
 	// all public for unit tests
 	public int cleanerHeadX;
 	public int cleanerHeadY;
+	public int prevHeadX;
+	public int prevHeadY;
 	public int cleanerLength;
 	
 	//cleaner will start moving left to right as game begins
@@ -61,7 +63,7 @@ public class Cleaner
 		cleanerHeadX = 120;
 		cleanerHeadY = 120;
 		cleanerLength = 1;
-		cleanerXDirection = 1;
+		cleanerXDirection = 0;
 		cleanerYDirection = 0;
 		
 		this.newBoard = board;
@@ -120,58 +122,47 @@ public class Cleaner
 		// right
 		if(event.getKeyCode() == KeyEvent.VK_RIGHT)
 		{
-			// not going left then asked to go right (backwards)
-			if(cleanerXDirection != -1)
-			{
 				cleanerXDirection = 1;
-				cleanerYDirection = 0;
-			}
 		}
 		//left
 		if(event.getKeyCode() == KeyEvent.VK_LEFT)
 		{
-			if(cleanerXDirection != 1)
-			{
 				cleanerXDirection = -1;
-				cleanerYDirection = 0;
-			}
 		}
 		// up
 		if(event.getKeyCode() == KeyEvent.VK_UP)
 		{
-			if(cleanerYDirection != 1)
-			{
 				cleanerYDirection = -1;
-				cleanerXDirection = 0;
-			}
 		}
 		// down
 		if(event.getKeyCode() == KeyEvent.VK_DOWN)
 		{
-			if(cleanerYDirection != -1)
-			{
-				cleanerYDirection = 1;
-				cleanerXDirection = 0;
-			}
+			cleanerYDirection = 1;
 		}
 		
 		// if any error occurs and want to stop game
 		if(event.getKeyCode() == KeyEvent.VK_Q)
 			newBoard.gameOver();
 		
+		moveCleaner();
+		
 	}
+	
+	/*
+	 * keyReleased, stops moving
+	 */
+	public void keyReleased()
+	{
+		cleanerXDirection = 0;
+		cleanerYDirection = 0;
+	}
+	
+	
 	/*
 	 *  process of moving the cleaner
 	 */
 	public void moveCleaner()
 	{		
-		// update body of earthCleaner FIRST, will do head after
-		for(int size = cleanerLength - 1; size > 0; size--)
-		{
-			cleanerXCoordinates.set(size, cleanerXCoordinates.get(size - 1));
-			cleanerYCoordinates.set(size, cleanerYCoordinates.get(size - 1));
-		}
-		
 		// based on key pressed, change head position (position 0)
 		// position of character in 'fun' mode
 		if(cleanerXDirection == 1)
@@ -186,6 +177,26 @@ public class Cleaner
 		// update head information
 		cleanerHeadX = cleanerXCoordinates.get(0);
 		cleanerHeadY = cleanerYCoordinates.get(0);
+		
+		if(newBoard.trash.checkTreeLocation(cleanerHeadX, cleanerHeadY))
+		{
+			cleanerXCoordinates.set(0, prevHeadX);
+			cleanerYCoordinates.set(0, prevHeadY);
+			cleanerHeadX = prevHeadX;
+			cleanerHeadY = prevHeadY;
+		}
+		else
+		{
+			// update trash
+			if(cleanerLength == 2)
+			{
+				cleanerXCoordinates.set(1, prevHeadX);
+				cleanerYCoordinates.set(1, prevHeadY);
+			}
+			
+			prevHeadX = cleanerHeadX;
+			prevHeadY = cleanerHeadY;
+		}
 	}
 	
 	/*
@@ -222,6 +233,9 @@ public class Cleaner
 			cleanerHeadY = newBoard.gameHeight - 40;
 			cleanerXDirection = 0;
 		}
+		
+		prevHeadX = cleanerHeadX;
+		prevHeadY = cleanerHeadY;
 	}
 	
 	/*
@@ -316,8 +330,8 @@ public class Cleaner
 		cleanerLength++;
 		
 		// add to end of current cleaner what previous last part of cleaner was
-		cleanerXCoordinates.add(cleanerXCoordinates.get(cleanerLength-2));
-		cleanerYCoordinates.add(cleanerYCoordinates.get(cleanerLength-2));
+		cleanerXCoordinates.add(prevHeadX);
+		cleanerYCoordinates.add(prevHeadY);
 	}
 	
 	/*
@@ -325,7 +339,7 @@ public class Cleaner
 	 */
 	public void decreaseCleanerSize()
 	{
-		// add to end of current cleaner what previous last part of cleaner was
+		// add to end of current cleaner what previous head location was
 		cleanerXCoordinates.remove(1);
 		cleanerYCoordinates.remove(1);
 		

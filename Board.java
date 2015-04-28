@@ -76,6 +76,9 @@ public class Board extends JPanel
         ImageIcon myBackgroundImageOcean = new ImageIcon(this.getClass().getResource("/oceanBackground.jpg"));
         backgroundImageOcean = myBackgroundImageOcean.getImage();
         scaledBackgroundImageOcean = backgroundImageOcean.getScaledInstance(gameWidth, gameHeight, Image.SCALE_FAST);
+        
+        validate();
+        repaint();
 	}
 	
 	/*
@@ -90,7 +93,9 @@ public class Board extends JPanel
 			{}
 			@Override
 			public void keyReleased(KeyEvent event)
-			{}
+			{
+				earthCleaner.keyReleased();
+			}
 			@Override
 			public void keyPressed(KeyEvent event)
 			{	
@@ -119,7 +124,6 @@ public class Board extends JPanel
 			// the 'earth' game
 			if(testGamePlayed == false)
 			{
-				earthCleaner.moveCleaner();
 				earthCleaner.edgeContinue();
 				
 				repaint();
@@ -146,7 +150,7 @@ public class Board extends JPanel
 				
 				//repaint();
 				
-				Thread.sleep(100);
+				Thread.sleep(80);
 			}
 			// the 'ocean' game
 			else if(testGamePlayed == true)
@@ -155,7 +159,6 @@ public class Board extends JPanel
 				trashCollected.setText("TRASH COLLECTED: " + trashCollectedScore);
 				
 				// move cleaner and trashMan
-				earthCleaner.moveCleaner();
 				trashMan.moveRandomTrashMan(); // adds trash every 15 moves
 				
 				repaint();
@@ -184,7 +187,7 @@ public class Board extends JPanel
 				
 				//repaint(); // repaint after move
 				
-				Thread.sleep(100);
+				Thread.sleep(80);
 			}
 		}
 		

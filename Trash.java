@@ -134,6 +134,23 @@ public class Trash
 	}
 	
 	/*
+	 *  check to see if conflict with location
+	 */
+	public boolean checkTreeLocation(int xCoord, int yCoord)
+	{
+		boolean sameAsTree = false;
+		
+		// number of trees
+        for(int size = 0; size < treesMade; size++)
+        {
+        	if(xCoord == treesMadeXCoordinates.get(size) && yCoord == treesMadeYCoordinates.get(size))
+        		sameAsTree = true;
+        }
+		
+		return sameAsTree;
+	}
+	
+	/*
 	 * when trash recycled, plant tree
 	 */
 	public void plantTree()
@@ -228,6 +245,14 @@ public class Trash
 	public Rectangle getRecycleBounds(int recycleType)
 	{
 		return new Rectangle(recycleBinsXCoordinates.get(recycleType), recycleBinsYCoordinates.get(recycleType), recycleSize, recycleSize);
+	}
+	
+	/*
+	 * gets rid of trees after done
+	 */
+	public void resetTrees()
+	{
+		treesMade = 0;
 	}
 	
 	/*

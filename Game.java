@@ -80,6 +80,9 @@ public class Game extends JPanel
 		// add buttons and board to JPanel
 		add(newBoard, BorderLayout.CENTER);
 		add(buttonPanel, BorderLayout.PAGE_END);
+		
+		validate();
+		repaint();
 	}
 	
 	/*
@@ -442,7 +445,8 @@ public class Game extends JPanel
 	public void resetGame()
 	{
 		// reset game information
-		newBoard.earthCleaner.resetCleaner(120, 120, 1, 0, 1);
+		newBoard.earthCleaner.resetCleaner(120, 120, 0, 0, 1);
+		newBoard.trash.resetTrees();
 		newBoard.trashMan.resetTrashProduced();
 	}
 }
